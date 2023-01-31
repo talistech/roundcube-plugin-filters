@@ -58,9 +58,8 @@ class filters extends rcube_plugin{
     }
     else if ($this->rc->task == 'login'){
       if ($this->autoAddSpamFilterRule)
-	$this->add_hook('login_after', array($this, 'filters_addMoveSpamRule'));
-  $this->add_hook('login_after', array($this, 'filters_addCustomSpamRules'));
-  
+        $this->add_hook('login_after', array($this, 'filters_addMoveSpamRule'));
+        $this->add_hook('login_after', array($this, 'filters_addCustomSpamRules'));
     }
 
   }
@@ -529,7 +528,7 @@ class filters extends rcube_plugin{
 
   }
 
-  function filters_addCustomSpamRules($blacklistedSubjects){
+  function filters_addCustomSpamRules(){
 
     $user = $this->rc->user;
     foreach($this->blacklisted_subjects as $blacklistedSubject){
