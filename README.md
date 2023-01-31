@@ -1,4 +1,4 @@
-Roundcube Plugin Filters
+Roundcube Plugin Filters (Forked)
 ============================
 
 Plugin that adds a new tab to the settings section to create client-side e-mail filtering.
