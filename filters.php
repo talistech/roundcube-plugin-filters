@@ -16,7 +16,7 @@ class filters extends rcube_plugin{
 
   private $autoAddSpamFilterRule;
   private $spam_subject;
-  private $blacklistedSubjects;
+  private $blacklistedSubjects = array();
   private $spam_headers = array();
   private $caseInsensitiveSearch;
   private $decodeBase64Msg;
@@ -38,7 +38,7 @@ class filters extends rcube_plugin{
 
     $this->autoAddSpamFilterRule = $this->rc->config->get('autoAddSpamFilterRule',TRUE);
     $this->spam_subject = $this->rc->config->get('spam_subject','[SPAM]');
-    $this->blacklisted_subjects = $this->rc->config->get('blacklisted_subjects','');
+    $this->blacklisted_subjects = $this->rc->config->get('blacklisted_subjects','SPAM');
     $this->caseInsensitiveSearch = $this->rc->config->get('caseInsensitiveSearch',TRUE);
     $this->decodeBase64Msg = $this->rc->config->get('decodeBase64Msg',FALSE);
     $this->spam_headers = $this->rc->config->get('spam_headers','X-Spam-Flag');
