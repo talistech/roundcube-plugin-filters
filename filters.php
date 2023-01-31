@@ -16,6 +16,7 @@ class filters extends rcube_plugin{
 
   private $autoAddSpamFilterRule;
   private $spam_subject;
+  private $blacklistedSubjects;
   private $spam_headers = array();
   private $caseInsensitiveSearch;
   private $decodeBase64Msg;
@@ -37,6 +38,7 @@ class filters extends rcube_plugin{
 
     $this->autoAddSpamFilterRule = $this->rc->config->get('autoAddSpamFilterRule',TRUE);
     $this->spam_subject = $this->rc->config->get('spam_subject','[SPAM]');
+    $this->blacklisted_subjects = $this->rc->config->get('blacklisted_subjects','');
     $this->caseInsensitiveSearch = $this->rc->config->get('caseInsensitiveSearch',TRUE);
     $this->decodeBase64Msg = $this->rc->config->get('decodeBase64Msg',FALSE);
     $this->spam_headers = $this->rc->config->get('spam_headers','X-Spam-Flag');
@@ -57,6 +59,8 @@ class filters extends rcube_plugin{
     else if ($this->rc->task == 'login'){
       if ($this->autoAddSpamFilterRule)
 	$this->add_hook('login_after', array($this, 'filters_addMoveSpamRule'));
+  $this->add_hook('login_after', array($this, 'filters_addCustomSpamRules'));
+  
     }
 
   }
@@ -522,6 +526,48 @@ class filters extends rcube_plugin{
       $arr_prefs['filters'][] = $new_arr;
       $user->save_prefs($arr_prefs);
     }
+
+  }
+
+  function filters_addCustomSpamRules($blacklistedSubjects){
+
+    $user = $this->rc->user;
+    foreach($this->blacklisted_subjects as $blacklistedSubject){
+      $searchstring = $blacklistedSubject;
+      $destfolder = $this->rc->config->get('junk_mbox', null);
+      $whatfilter = "subject";
+      $messages = "all";
+  
+      //load filters
+      $arr_prefs = $this->rc->config->get('filters', array());
+  
+      // check if the rule is already enabled
+      $found = false;
+      foreach ($arr_prefs as $key => $saved_filter){
+        if ($saved_filter['searchstring'] == $searchstring && $saved_filter['whatfilter'] == $whatfilter) $found = true;
+        if ($saved_filter['searchstring'] == 'Yes' && $saved_filter['whatfilter'] == 'X-Spam-Flag') $found = true;
+      }
+  
+      if (!$found && $destfolder !== null && $destfolder !== ""){
+        $new_arr['whatfilter'] = $whatfilter;
+        $new_arr['searchstring'] = $searchstring;
+        $new_arr['srcfolder'] = 'INBOX';
+        $new_arr['destfolder'] = $destfolder;
+        $new_arr['messages'] = $messages;
+        $arr_prefs = $user->get_prefs();
+        $arr_prefs['filters'][] = $new_arr;
+        $user->save_prefs($arr_prefs);
+        $new_arr['whatfilter'] = 'X-Spam-Flag';
+        $new_arr['searchstring'] = 'Yes';
+        $new_arr['srcfolder'] = 'INBOX';
+        $new_arr['destfolder'] = $destfolder;
+        $new_arr['messages'] = $messages;
+        $arr_prefs = $user->get_prefs();
+        $arr_prefs['filters'][] = $new_arr;
+        $user->save_prefs($arr_prefs);
+      }
+    }
+
 
   }
 
